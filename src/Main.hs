@@ -4,6 +4,7 @@
 
 import System.Exit
 
+main :: IO ()
 main = do
   code <- doCrawl ""
   exitWith code

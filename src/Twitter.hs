@@ -3,6 +3,12 @@
 -}
 {-# LANGUAGE OverloadedStrings #-}
 
+module Twitter (
+  usersShow,
+  UsersShow (..),
+  createOAuth
+) where
+
 import Data.ByteString.Char8 as B
 import Control.Applicative
 import Control.Monad
@@ -12,6 +18,14 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types
 import Network (withSocketsDo)
 
+
+data UsersShow = UsersShow
+  { lang :: String } deriving (Show, Eq)
+
+instance JSON.FromJSON UsersShow where
+     parseJSON (JSON.Object v) = UsersShow <$>
+                            v JSON..: "lang"
+     parseJSON _ = mzero
 
 data OAuthInfo = OAuthInfo
   { consumerKey :: String
@@ -29,7 +43,7 @@ instance JSON.FromJSON OAuthInfo where
 
 secrets :: IO OAuthInfo
 secrets = do
-  filestream <- B.readFile "../config/oauth.json"
+  filestream <- B.readFile "../secrets/oauth.json"
   maybe (fail "failed to read") return $ JSON.decodeStrict filestream
 
 oauth :: IO OAuth.OAuth
@@ -46,17 +60,29 @@ oauth = do
     , OAuth.oauthVersion = OAuth.OAuth10a
     }
 
+createOAuth :: ByteString -> ByteString -> OAuth.OAuth
+createOAuth key secret = OAuth.newOAuth
+    { OAuth.oauthServerName = "twitter"
+    , OAuth.oauthRequestUri = "https://twitter.com/oauth/request_token"
+    , OAuth.oauthAccessTokenUri = "https://api.twitter.com/oauth/access_token"
+    , OAuth.oauthAuthorizeUri = "https://api.twitter.com/oauth/authorize"
+    , OAuth.oauthSignatureMethod = OAuth.HMACSHA1
+    , OAuth.oauthConsumerKey = key
+    , OAuth.oauthConsumerSecret = secret
+    , OAuth.oauthVersion = OAuth.OAuth10a
+    }
+
 endPoint :: String -> String
 endPoint x = "https://api.twitter.com/1.1/" ++ x ++ ".json"
 
-fetch :: Method -> OAuth.OAuth -> Credential -> String -> SimpleQuery -> IO JSON.Value
+fetch :: Method -> OAuth.OAuth -> Credential -> String -> SimpleQuery -> IO UsersShow
 fetch mth oauth cred apiName query = withManager $ \man -> do
   req <- parseUrl (endPoint apiName)
   req' <- signOAuth oauth cred (req { method = mth, queryString = renderSimpleQuery True query })
   res <- httpLbs req' man
   maybe (fail "JSON decoding error") return $ JSON.decode (responseBody res)
 
-usersShow :: OAuth.OAuth -> Credential -> SimpleQuery -> IO JSON.Value
+usersShow :: OAuth.OAuth -> Credential -> SimpleQuery -> IO UsersShow
 usersShow oauth cred query = fetch methodGet oauth cred "users/show" query
 
 main :: IO ()
@@ -64,5 +90,5 @@ main = withSocketsDo $ do
   secrets' <- secrets
   let cred = newCredential (B.pack $ accessToken secrets') (B.pack $ accessSecret secrets')
   oa <- oauth
-  result <- usersShow oa cred [("screen_name", "__Attsun__")]
+  result <- usersShow (createOAuth (B.pack $ consumerKey secrets') (B.pack $ consumerSecret secrets')) cred [("screen_name", "__Attsun__")]
   print result
