@@ -13,7 +13,7 @@ cabal-version:       >=1.10
 
 executable Birdwatcher
   main-is: Main.hs
-  other-modules: Twitter
+  other-modules: Twitter, OAuth
   Hs-Source-Dirs: src
   build-depends:       base ==4.6.*, bytestring ==0.10.*, aeson ==0.7.*, authenticate-oauth ==1.4.*, http-conduit ==2.0.*, http-types ==0.8.*, network ==2.4.*, hspec ==1.8.*, containers==0.5.*
   default-language:    Haskell2010

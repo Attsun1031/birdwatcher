@@ -3,7 +3,6 @@
 module TwitterSpec where
 import Test.Hspec
 import Twitter
-import Web.Authenticate.OAuth as OAuth
 
 main :: IO ()
 main = hspec spec
@@ -16,6 +15,4 @@ spec = do
 
   describe "Twitter.usersShow" $ do
     it "return some response" $ do
-      oauth <- return (createOAuth "key" "secret")
-      cred <- return (newCredential "token" "secret")
-      usersShow oauth cred [("screen_name", "__Attsun__")] `shouldReturn` UsersShow { lang = "ja" }
+      usersShow [("screen_name", "__Attsun__")] `shouldReturn` UsersShow { lang = "ja" }
