@@ -9,10 +9,7 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-  describe "Prelude.head" $ do
-    it "returns the first element of list" $ do
-      Prelude.head [1..20] `shouldBe` (1 :: Int)
-
   describe "Twitter.usersShow" $ do
-    it "return some response" $ do
-      usersShow [("screen_name", "__Attsun__")] `shouldReturn` UsersShow { lang = "ja" }
+    it "users/show API result" $ do
+      expect <- return $ UsersShow { name = "あつん", screen_name = "__Attsun__", Twitter.id = 252464840 }
+      usersShow [("user_id", "252464840")] `shouldReturn` expect
