@@ -2,6 +2,7 @@
   Twitter API
 -}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Twitter (
   usersShow,
@@ -10,48 +11,52 @@ module Twitter (
   UserTimeline (..)
 ) where
 
-import Control.Applicative
-import Control.Monad
+import GHC.Generics
 import Web.Authenticate.OAuth as OAuth
 import qualified Data.Aeson as JSON
+import Data.Aeson.Types
 import Network.HTTP.Conduit
 import Network.HTTP.Types (SimpleQuery, Method, renderSimpleQuery, methodGet)
 import OAuth
+import Utils
 
+
+options :: Options
+options = Options
+  { fieldLabelModifier = camel2snake
+  , constructorTagModifier = constructorTagModifier defaultOptions
+  , allNullaryToStringTag = allNullaryToStringTag defaultOptions
+  , omitNothingFields = omitNothingFields defaultOptions
+  , sumEncoding = sumEncoding defaultOptions
+  }
 
 data UsersShow = UsersShow
   { name :: String
-  , screen_name :: String
+  , screenName :: String
   , id :: Int
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
 
 instance JSON.FromJSON UsersShow where
-     parseJSON (JSON.Object v) = UsersShow <$>
-                            v JSON..: "name" <*>
-                            v JSON..: "screen_name" <*>
-                            v JSON..: "id"
-     parseJSON _ = mzero
+  parseJSON = JSON.genericParseJSON options
 
 data UserTimeline = UserTimeline
   { text :: String
-  , retweet_count :: Int
-  } deriving (Show, Eq)
+  , retweetCount :: Int
+  --, statusId :: Int
+  } deriving (Show, Eq, Generic)
 
 instance JSON.FromJSON UserTimeline where
-     parseJSON (JSON.Object v) = UserTimeline <$>
-                            v JSON..: "text" <*>
-                            v JSON..: "retweet_count"
-     parseJSON _ = mzero
+  parseJSON = JSON.genericParseJSON options
 
 endPoint :: String -> String
 endPoint x = "https://api.twitter.com/1.1/" ++ x ++ ".json"
 
 fetch :: (JSON.FromJSON t) => OAuth.OAuth -> OAuth.Credential -> Method -> String -> SimpleQuery -> IO t
-fetch oa cred mth url query = withManager $ \man -> do
-  req <- parseUrl url
+fetch oa cred mth u query = withManager $ \man -> do
+  req <- parseUrl u
   req' <- signOAuth oa cred (req { method = mth, queryString = renderSimpleQuery True query })
   res <- httpLbs req' man
-  maybe (fail "JSON decoding error") return $ JSON.decode (responseBody res)
+  either (\s -> fail s) return $ JSON.eitherDecode (responseBody res)
 
 callTwitterAPI :: (JSON.FromJSON t) => String -> Method -> SimpleQuery -> IO t
 callTwitterAPI apiName m query = do
