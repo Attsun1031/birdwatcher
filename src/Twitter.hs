@@ -5,7 +5,9 @@
 
 module Twitter (
   usersShow,
-  UsersShow (..)
+  UsersShow (..),
+  userTimeline,
+  UserTimeline (..)
 ) where
 
 import Control.Applicative
@@ -13,7 +15,7 @@ import Control.Monad
 import Web.Authenticate.OAuth as OAuth
 import qualified Data.Aeson as JSON
 import Network.HTTP.Conduit
-import Network.HTTP.Types
+import Network.HTTP.Types (SimpleQuery, Method, renderSimpleQuery, methodGet)
 import OAuth
 
 
@@ -30,28 +32,43 @@ instance JSON.FromJSON UsersShow where
                             v JSON..: "id"
      parseJSON _ = mzero
 
+data UserTimeline = UserTimeline
+  { text :: String
+  , retweet_count :: Int
+  } deriving (Show, Eq)
+
+instance JSON.FromJSON UserTimeline where
+     parseJSON (JSON.Object v) = UserTimeline <$>
+                            v JSON..: "text" <*>
+                            v JSON..: "retweet_count"
+     parseJSON _ = mzero
+
 endPoint :: String -> String
 endPoint x = "https://api.twitter.com/1.1/" ++ x ++ ".json"
 
-fetch :: OAuth.OAuth -> OAuth.Credential -> Method -> String -> SimpleQuery -> IO UsersShow
-fetch oa cred mth apiName query = withManager $ \man -> do
-  req <- parseUrl (endPoint apiName)
+fetch :: (JSON.FromJSON t) => OAuth.OAuth -> OAuth.Credential -> Method -> String -> SimpleQuery -> IO t
+fetch oa cred mth url query = withManager $ \man -> do
+  req <- parseUrl url
   req' <- signOAuth oa cred (req { method = mth, queryString = renderSimpleQuery True query })
   res <- httpLbs req' man
   maybe (fail "JSON decoding error") return $ JSON.decode (responseBody res)
 
-usersShow :: SimpleQuery -> IO UsersShow
-usersShow query = do
+callTwitterAPI :: (JSON.FromJSON t) => String -> Method -> SimpleQuery -> IO t
+callTwitterAPI apiName m query = do
   oa <- oauth
   cred <- credential
-  fetch oa cred methodGet "users/show" query
+  fetch oa cred m (endPoint apiName) query
+
+usersShow :: SimpleQuery -> IO UsersShow
+usersShow = callTwitterAPI "users/show" methodGet
+
+userTimeline :: SimpleQuery -> IO [UserTimeline]
+userTimeline = callTwitterAPI "statuses/user_timeline" methodGet
 
 {-
 main :: IO ()
 main = withSocketsDo $ do
-  secrets' <- secrets
-  let cred = newCredential (B.pack $ accessToken secrets') (B.pack $ accessSecret secrets')
-  oa <- oauth
-  result <- usersShow (createOAuth (B.pack $ consumerKey secrets') (B.pack $ consumerSecret secrets')) cred [("screen_name", "__Attsun__")]
+  --result <- usersShow (createOAuth (B.pack $ consumerKey secrets') (B.pack $ consumerSecret secrets')) cred [("screen_name", "__Attsun__")]
+  result <- userTimeline [("screen_name", "__Attsun__")]
   print result
   -}

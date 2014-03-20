@@ -15,7 +15,7 @@ executable Birdwatcher
   main-is: Main.hs
   other-modules: Twitter, OAuth
   Hs-Source-Dirs: src
-  build-depends:       base ==4.6.*, bytestring ==0.10.*, aeson ==0.7.*, authenticate-oauth ==1.4.*, http-conduit ==2.0.*, http-types ==0.8.*, network ==2.4.*, hspec ==1.8.*, containers==0.5.*
+  build-depends:       base ==4.6.*, bytestring ==0.10.*, aeson ==0.7.*, authenticate-oauth ==1.4.*, http-conduit ==2.0.*, http-types ==0.8.*, network ==2.4.*, hspec ==1.8.*, containers==0.5.*, directory==1.2.*
   default-language:    Haskell2010
 
 Test-Suite spec
@@ -24,5 +24,5 @@ Test-Suite spec
   Hs-Source-Dirs:       src, test
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
-  build-depends:       base ==4.6.*, bytestring ==0.10.*, aeson ==0.7.*, authenticate-oauth ==1.4.*, http-conduit ==2.0.*, http-types ==0.8.*, network ==2.4.*, hspec ==1.8.*, containers==0.5.*
+  build-depends:       base ==4.6.*, bytestring ==0.10.*, aeson ==0.7.*, authenticate-oauth ==1.4.*, http-conduit ==2.0.*, http-types ==0.8.*, network ==2.4.*, hspec ==1.8.*, containers==0.5.*, directory==1.2.*
   Build-Depends:        base, hspec >= 1.3
