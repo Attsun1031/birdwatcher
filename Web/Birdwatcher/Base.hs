@@ -9,12 +9,11 @@ module Web.Birdwatcher.Base (
   callTwitterAPI
 ) where
 
-import GHC.Generics
 import Web.Authenticate.OAuth as OAuth
 import qualified Data.Aeson as JSON
 import Data.Aeson.Types
 import Network.HTTP.Conduit
-import Network.HTTP.Types (SimpleQuery, Method, renderSimpleQuery, methodGet)
+import Network.HTTP.Types (SimpleQuery, Method, renderSimpleQuery)
 import Web.Birdwatcher.OAuth
 import Web.Birdwatcher.Utils
 
@@ -27,15 +26,6 @@ options = Options
   , omitNothingFields = omitNothingFields defaultOptions
   , sumEncoding = sumEncoding defaultOptions
   }
-
-data UserTimeline = UserTimeline
-  { text :: String
-  , retweetCount :: Int
-  --, statusId :: Int
-  } deriving (Show, Eq, Generic)
-
-instance JSON.FromJSON UserTimeline where
-  parseJSON = JSON.genericParseJSON options
 
 endPoint :: String -> String
 endPoint x = "https://api.twitter.com/1.1/" ++ x ++ ".json"
@@ -52,9 +42,6 @@ callTwitterAPI apiName m query = do
   oa <- oauth
   cred <- credential
   fetch oa cred m (endPoint apiName) query
-
-userTimeline :: SimpleQuery -> IO [UserTimeline]
-userTimeline = callTwitterAPI "statuses/user_timeline" methodGet
 
 {-
 main :: IO ()

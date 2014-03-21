@@ -17,9 +17,9 @@ import Web.Birdwatcher.Base
 
 
 data UsersShow = UsersShow
-  { name :: String
+  { id :: Int
+  , name :: String
   , screenName :: String
-  , id :: Int
   } deriving (Show, Eq, Generic)
 
 instance JSON.FromJSON UsersShow where
