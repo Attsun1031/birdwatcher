@@ -4,11 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Twitter (
-  usersShow,
-  UsersShow (..),
-  userTimeline,
-  UserTimeline (..)
+module Web.Birdwatcher.Base (
+  options,
+  callTwitterAPI
 ) where
 
 import GHC.Generics
@@ -17,8 +15,8 @@ import qualified Data.Aeson as JSON
 import Data.Aeson.Types
 import Network.HTTP.Conduit
 import Network.HTTP.Types (SimpleQuery, Method, renderSimpleQuery, methodGet)
-import OAuth
-import Utils
+import Web.Birdwatcher.OAuth
+import Web.Birdwatcher.Utils
 
 
 options :: Options
@@ -29,15 +27,6 @@ options = Options
   , omitNothingFields = omitNothingFields defaultOptions
   , sumEncoding = sumEncoding defaultOptions
   }
-
-data UsersShow = UsersShow
-  { name :: String
-  , screenName :: String
-  , id :: Int
-  } deriving (Show, Eq, Generic)
-
-instance JSON.FromJSON UsersShow where
-  parseJSON = JSON.genericParseJSON options
 
 data UserTimeline = UserTimeline
   { text :: String
@@ -63,9 +52,6 @@ callTwitterAPI apiName m query = do
   oa <- oauth
   cred <- credential
   fetch oa cred m (endPoint apiName) query
-
-usersShow :: SimpleQuery -> IO UsersShow
-usersShow = callTwitterAPI "users/show" methodGet
 
 userTimeline :: SimpleQuery -> IO [UserTimeline]
 userTimeline = callTwitterAPI "statuses/user_timeline" methodGet

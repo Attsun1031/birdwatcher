@@ -3,7 +3,7 @@
 -}
 {-# LANGUAGE OverloadedStrings #-}
 
-module OAuth (
+module Web.Birdwatcher.OAuth (
   oauth,
   credential
 ) where

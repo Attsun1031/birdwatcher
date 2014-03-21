@@ -1,7 +1,7 @@
 {-
   Utilities
 -}
-module Utils (
+module Web.Birdwatcher.Utils (
   snake2camel,
   camel2snake
 ) where
