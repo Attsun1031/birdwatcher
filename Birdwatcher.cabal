@@ -15,6 +15,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:
+    Web.Birdwatcher
     Web.Birdwatcher.UsersShow
     Web.Birdwatcher.UserTimeline
     Web.Birdwatcher.Base

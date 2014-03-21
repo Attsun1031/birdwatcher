@@ -2,8 +2,9 @@
 
 module TwitterSpec where
 import Test.Hspec
-import Web.Birdwatcher.UsersShow
-import Web.Birdwatcher.UserTimeline
+import Web.Birdwatcher
+import Web.Birdwatcher.UsersShow (UsersShow (..))
+import Web.Birdwatcher.UserTimeline (UserTimeline (..))
 import Data.ByteString.Char8 as B
 
 main :: IO ()
