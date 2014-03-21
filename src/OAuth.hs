@@ -8,7 +8,7 @@ module OAuth (
   credential
 ) where
 
-import System.Directory (getCurrentDirectory)
+import System.Environment
 import Data.ByteString.Char8 as B
 import Control.Applicative
 import Control.Monad
@@ -32,8 +32,8 @@ instance JSON.FromJSON OAuthProps where
 
 secrets :: IO OAuthProps
 secrets = do
-  currentDir <- getCurrentDirectory
-  filestream <- B.readFile $ currentDir ++ "/../secrets/oauth.json"
+  appHome <- getEnv "APP_HOME"
+  filestream <- B.readFile $ appHome ++ "/secrets/oauth.json"
   maybe (fail "failed to read") return $ JSON.decodeStrict filestream
 
 oauth :: IO OAuth.OAuth
