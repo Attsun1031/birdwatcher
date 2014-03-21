@@ -6,6 +6,8 @@ import Web.Birdwatcher
 import Web.Birdwatcher.UsersShow (UsersShow (..))
 import Web.Birdwatcher.UserTimeline (UserTimeline (..))
 import Data.ByteString.Char8 as B
+import Network.HTTP.Conduit
+import Network.HTTP.Types
 
 main :: IO ()
 main = hspec spec
@@ -16,6 +18,9 @@ spec = do
     it "users/show API result" $ do
       expect <- return $ UsersShow  252464840 "あつん" "__Attsun__"
       usersShow [("user_id", "252464840")] `shouldReturn` expect
+
+    it "not found user" $ do
+      usersShow [("user_id", "0")] `shouldThrow` (\(StatusCodeException status _ _) -> status == status404)
 
   describe "userTimeline" $ do
     it "statuses/userTimeline API result" $ do
