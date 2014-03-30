@@ -5,7 +5,6 @@ name:                Birdwatcher
 version:             0.1.0.0
 description:         Twitter API Library
 copyright:           __Attsun__
-license-file:        LICENSE
 author:              Attsun
 maintainer:          atsumi.tatsuya@gmail.com
 copyright:           __Attsun__
