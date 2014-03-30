@@ -1,23 +1,29 @@
-This is a crawler impledmented by haskell.
+Birdwatcher is a twitter library for Haskell.
 
 ## requirements
 ### OAuth
-you have to set following values as environment variables.
+Birdwatcher read json file at the following path to get information about oauth.
+
+```
+$APP_HOME/secrets/oauth.json
+```
+
+As you can see, you have to set environment variable `APP_HOME`.
 
 ```
 $ export APP_HOME="/this/is/my/root"
 ```
 
-## create dev env
+And oauth.json must have followin key-value pairs.
 
 ```
-cabal sandbox init
-cabal install --enable-tests --only-dependencies
-cabal configure --enable-tests
+{
+  "consumerKey": "consumer key",
+  "consumerSecret": "consumer secret",
+  "accessToken": "access token",
+  "accessSecret": "access secret"
+}
 ```
 
-## build and test
-
-```
-cabal build && cabal test
-```
+## how to use
+see <https://github.com/Attsun1031/birdwatcher/blob/master/test/TwitterSpec.hs>.
